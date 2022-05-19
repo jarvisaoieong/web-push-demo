@@ -6,5 +6,8 @@
     "express": "4.16.3",
     "express-static": "1.2.5",
     "web-push": "3.3.0"
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }

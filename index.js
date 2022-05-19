@@ -2,6 +2,8 @@ const express = require('express')
 const webpush = require('web-push')
 const fs = require('fs')
 
+const port = 3000
+
 // Generate Key
 let key
 try {
@@ -10,7 +12,7 @@ try {
   key = webpush.generateVAPIDKeys()
   fs.writeFileSync(__dirname + '/VAPIDKeys.json', JSON.stringify(key, null, 2))
   fs.writeFileSync(
-    __dirname + '/publicVapidKey.js',
+    __dirname + '/frontend/publicVapidKey.js',
     `window.publicVapidKey = '${key.publicKey}';`
   )
 }
@@ -36,6 +38,6 @@ app.post('/subscribe', async (req, res) => {
   console.log('pushing')
 })
 
-app.use(require('express-static')('./'))
+app.use(require('express-static')('./frontend'))
 
-app.listen(3000)
+app.listen(port, () => console.log(`listen on ${port}`))
