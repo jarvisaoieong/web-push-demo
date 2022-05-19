@@ -1,28 +1,41 @@
-const express = require('express');
-const webpush = require('web-push');
+const express = require('express')
+const webpush = require('web-push')
+const fs = require('fs')
 
-const publicVapidKey = process.env.PUBLIC_VAPID_KEY;
-const privateVapidKey = process.env.PRIVATE_VAPID_KEY;
+// Generate Key
+let key
+try {
+  key = require('./VAPIDKeys.json')
+} catch (error) {
+  key = webpush.generateVAPIDKeys()
+  fs.writeFileSync(__dirname + '/VAPIDKeys.json', JSON.stringify(key, null, 2))
+  fs.writeFileSync(
+    __dirname + '/publicVapidKey.js',
+    `window.publicVapidKey = '${key.publicKey}';`
+  )
+}
 
 // Replace with your email
-webpush.setVapidDetails('mailto:val@karpov.io', publicVapidKey, privateVapidKey);
+webpush.setVapidDetails(
+  'mailto:kinua1230@gmail.com',
+  key.publicKey,
+  key.privateKey
+)
 
-const app = express();
+const app = express()
 
-app.use(require('body-parser').json());
+app.use(require('body-parser').json())
 
-app.post('/subscribe', (req, res) => {
-  const subscription = req.body;
-  res.status(201).json({});
-  const payload = JSON.stringify({ title: 'test' });
+app.post('/subscribe', async (req, res) => {
+  const subscription = req.body
+  console.log(subscription)
+  res.status(201).json({})
 
-  console.log(subscription);
+  const payload = JSON.stringify({ title: 'test' })
+  await webpush.sendNotification(subscription, payload)
+  console.log('pushing')
+})
 
-  webpush.sendNotification(subscription, payload).catch(error => {
-    console.error(error.stack);
-  });
-});
+app.use(require('express-static')('./'))
 
-app.use(require('express-static')('./'));
-
-app.listen(3000);
+app.listen(3000)
